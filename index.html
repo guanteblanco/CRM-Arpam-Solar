@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arpam Solar · Clients</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#eef2f4;--panel:#fff;--ink:#14232b;--mute:#5d6f78;--line:#d9e1e5;--brand:#0f4c5c;--sun:#f5b301;--danger:#b42318}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1a20;--panel:#15262e;--ink:#e8eff2;--mute:#8fa4ae;--line:#26404b;--brand:#5fb3c7;--danger:#f97066}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 Figtree,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;margin-right:auto}
+.sun{width:22px;height:22px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 4px color-mix(in srgb,var(--sun) 30%,transparent)}
+main{max-width:1150px;margin:0 auto;padding:20px}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+button{cursor:pointer;border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:8px}
+button.p{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+@media (prefers-color-scheme:dark){button.p{color:#0e1a20}}
+button.d{color:var(--danger)}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.chip{border-radius:20px;padding:5px 12px;font-size:13px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip b{margin-left:4px;opacity:.7}
+.bar{display:flex;gap:10px;margin-bottom:14px}
+.wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:820px}
+th{text-align:left;font-size:13px;color:var(--mute);font-weight:500;padding:10px 14px;border-bottom:1px solid var(--line)}
+td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border:0}
+td small{display:block;color:var(--mute)}
+td select{width:auto;font-weight:600;border-radius:20px;padding:4px 8px}
+.late{color:var(--danger);font-weight:600}
+.empty{padding:40px;text-align:center;color:var(--mute)}
+.act{white-space:nowrap;text-align:right}
+.act button{padding:5px 10px;font-size:13px}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);width:min(700px,94vw);padding:22px;max-height:92vh}
+dialog::backdrop{background:#0008}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g label{font-size:13px;color:var(--mute)}
+.g .f{grid-column:1/-1}
+.pr{display:grid;grid-template-columns:130px 1fr 110px auto auto;gap:8px;align-items:center;margin-bottom:8px}
+.pr input[type=checkbox]{width:auto}
+.pr .ck{display:flex;gap:5px;align-items:center;color:var(--ink);font-size:14px}
+#resum{margin:10px 0 0;font-size:14px;color:var(--ink)}
+@media(max-width:600px){.pr{grid-template-columns:1fr 1fr}}
+.ft{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+#login{max-width:340px;margin:12vh auto;padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+#login input{margin-bottom:10px}
+.demo{background:var(--sun);color:#14232b;padding:6px 20px;font-size:13px;text-align:center}
+@media(max-width:600px){.g{grid-template-columns:1fr}.bar{flex-direction:column}}
+</style>
+</head>
+<body>
+<!-- ============ CONFIGURACIÓ (omple-ho amb les dades de Supabase) ============ -->
+<script>
+const SUPABASE_URL = "https://xwmqcgpzrsatjnephadl.supabase.co";   // ex: https://xxxx.supabase.co
+const SUPABASE_KEY = "sb_publishable_indzhTub1h69vF48lv_i9g_bJ9yLEC-";   // clau "publishable" (sb_publishable_...)
+window.addEventListener("error", e => {
+  const a = document.getElementById("app");
+  if (a && !a.innerHTML.trim()) a.innerHTML = '<div style="max-width:480px;margin:10vh auto;padding:20px;font-family:sans-serif"><b>No s\'ha pogut iniciar l\'app</b><p style="color:#b42318">' + String(e.message).replace(/</g,"&lt;") + '</p><p>Revisa SUPABASE_URL i SUPABASE_KEY a index.html, i que tinguis connexió a Internet.</p></div>';
+});
+</script>
+
+<div id="app"></div>
+
+<dialog id="dlg">
+  <form id="frm" method="dialog">
+    <h2 id="dt" style="margin:0 0 14px">Nou client</h2>
+    <div class="g">
+      <div class="f"><label>Nom o empresa *<input id="nom" required></label></div>
+      <div><label>Telèfon<input id="telefon" type="tel"></label></div>
+      <div><label>Correu electrònic<input id="email" type="email"></label></div>
+      <div><label>Població<input id="poblacio"></label></div>
+      <div><label>Tipus d'instal·lació<select id="tipus"><option>Habitatge</option><option>Empresa / nau</option><option>Agrícola</option><option>Altres</option></select></label></div>
+      <div><label>Potència (kW)<input id="potencia" type="number" step="0.1" min="0"></label></div>
+      <div><label>Import (€)<input id="import" type="number" step="0.01" min="0"></label></div>
+      <div><label>Estat<select id="estat"></select></label></div>
+      <div><label>Proper seguiment<input id="seguiment" type="date"></label></div>
+      <div class="f"><label>Notes<textarea id="notes" rows="3"></textarea></label></div>
+      <div class="f" style="border-top:1px solid var(--line);padding-top:12px">
+        <b style="font-size:15px">Pagaments</b>
+        <div id="pags" style="margin:10px 0"></div>
+        <button type="button" id="addp">Afegeix pagament</button>
+        <p id="resum"></p>
+      </div>
+    </div>
+    <div class="ft"><button type="button" id="cancel">Cancel·la</button><button class="p">Desa</button></div>
+  </form>
+</dialog>
+
+<script>
+const ESTATS = {
+  "Nou contacte":"#3b82f6","Pendent de pressupost":"#f59e0b","Pressupost enviat":"#8b5cf6",
+  "Per facturar":"#ea580c","Pendent de pagament":"#dc2626","Pagat":"#16a34a","Descartat":"#6b7280"
+};
+const demo = !SUPABASE_URL;
+const sb = demo ? null : supabase.createClient(SUPABASE_URL.trim().replace(/\/+$/,"").replace(/\/rest\/v1$/,""), SUPABASE_KEY.trim());
+let clients = [], filtre = "Tots", cerca = "", editId = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const eur = n => n || n === 0 ? Number(n).toLocaleString("ca-ES",{style:"currency",currency:"EUR"}) : "–";
+const CAMPS = ["nom","telefon","email","poblacio","tipus","potencia","import","estat","seguiment","notes"];
+$("estat").innerHTML = Object.keys(ESTATS).map(e => `<option>${e}</option>`).join("");
+
+let pags = [];
+const cobrat = c => (c.pagaments || []).reduce((s,p) => s + (p.cobrat ? Number(p.import) || 0 : 0), 0);
+function resum(){
+  const imp = Number($("import").value) || 0;
+  const cob = pags.reduce((s,p) => s + (p.cobrat ? Number(p.import) || 0 : 0), 0);
+  const prev = pags.reduce((s,p) => s + (Number(p.import) || 0), 0);
+  $("resum").innerHTML = `Cobrat: <b>${eur(cob)}</b> · Pendent de cobrar: <b>${eur(Math.max(imp - cob, 0))}</b>` +
+    (imp && prev !== imp ? ` · <span class="late">Els pagaments sumen ${eur(prev)} i l'import és ${eur(imp)}</span>` : "");
+}
+function pintaPags(){
+  $("pags").innerHTML = pags.length ? pags.map((p,i) => `<div class="pr">
+    <input type="date" data-p="${i}" data-k="data" value="${esc(p.data)}" aria-label="Data">
+    <input data-p="${i}" data-k="concepte" placeholder="Concepte (ex: entrada 30%)" value="${esc(p.concepte)}">
+    <input type="number" step="0.01" min="0" data-p="${i}" data-k="import" placeholder="Import €" value="${esc(p.import)}">
+    <label class="ck"><input type="checkbox" data-p="${i}" data-k="cobrat" ${p.cobrat ? "checked" : ""}>Cobrat</label>
+    <button type="button" class="d" data-dp="${i}" aria-label="Elimina el pagament">✕</button></div>`).join("")
+    : '<small style="color:var(--mute)">Encara no hi ha pagaments. Afegeix-hi l\'entrada i els pagaments previstos.</small>';
+  $("pags").querySelectorAll("[data-p]").forEach(el => el.oninput = el.onchange = () => {
+    pags[el.dataset.p][el.dataset.k] = el.type === "checkbox" ? el.checked : el.dataset.k === "import" ? (el.value === "" ? "" : Number(el.value)) : el.value;
+    resum();
+  });
+  $("pags").querySelectorAll("[data-dp]").forEach(b => b.onclick = () => { pags.splice(b.dataset.dp, 1); pintaPags(); });
+  resum();
+}
+$("addp").onclick = () => { pags.push({data:new Date().toISOString().slice(0,10), concepte:"", import:"", cobrat:false}); pintaPags(); };
+$("import").oninput = resum;
+
+async function carrega(){
+  if (demo) clients = JSON.parse(localStorage.getItem("arpam_clients") || "[]");
+  else {
+    const {data,error} = await sb.from("clients").select("*").order("created_at",{ascending:false});
+    if (error) return alert("Error en carregar: " + error.message);
+    clients = data;
+  }
+  pinta();
+}
+async function desa(c){
+  if (demo) {
+    if (c.id) clients = clients.map(x => x.id === c.id ? {...x,...c} : x);
+    else clients.unshift({...c, id: Date.now()});
+    localStorage.setItem("arpam_clients", JSON.stringify(clients));
+  } else {
+    const r = c.id ? await sb.from("clients").update(c).eq("id", c.id) : await sb.from("clients").insert(c);
+    if (r.error) return alert("Error en desar: " + r.error.message);
+  }
+  carrega();
+}
+async function esborra(id){
+  if (!confirm("Segur que vols eliminar aquest client? No es pot desfer.")) return;
+  if (demo) { clients = clients.filter(x => x.id !== id); localStorage.setItem("arpam_clients", JSON.stringify(clients)); }
+  else { const {error} = await sb.from("clients").delete().eq("id", id); if (error) return alert(error.message); }
+  carrega();
+}
+
+function pinta(){
+  const avui = new Date().toISOString().slice(0,10);
+  const cnt = e => clients.filter(c => c.estat === e).length;
+  const llista = clients.filter(c =>
+    (filtre === "Tots" || c.estat === filtre) &&
+    (!cerca || [c.nom,c.telefon,c.email,c.poblacio,c.notes].join(" ").toLowerCase().includes(cerca.toLowerCase())));
+  const total = llista.reduce((s,c) => s + (Number(c.import) || 0), 0);
+  const cobTotal = llista.reduce((s,c) => s + cobrat(c), 0);
+  $("app").innerHTML = `
+  ${demo ? '<div class="demo">Mode prova: les dades només es guarden en aquest navegador. Configura Supabase per compartir-les amb els socis.</div>' : ''}
+  <header><div class="logo"><span class="sun"></span>Arpam Solar</div>
+    ${demo ? '' : '<button id="out">Tanca la sessió</button>'}</header>
+  <main>
+    <div class="chips">
+      <button class="chip ${filtre==="Tots"?"on":""}" data-f="Tots">Tots<b>${clients.length}</b></button>
+      ${Object.keys(ESTATS).map(e => `<button class="chip ${filtre===e?"on":""}" data-f="${e}">${e}<b>${cnt(e)}</b></button>`).join("")}
+    </div>
+    <div class="bar"><input id="q" placeholder="Cerca per nom, telèfon, població…" value="${esc(cerca)}"><button class="p" id="nou">Afegeix client</button></div>
+    <div class="wrap">${llista.length ? `<table>
+      <tr><th>Client</th><th>Contacte</th><th>Instal·lació</th><th>Import</th><th>Estat</th><th>Seguiment</th><th></th></tr>
+      ${llista.map(c => `<tr>
+        <td><b>${esc(c.nom)}</b><small>${esc(c.poblacio)}</small></td>
+        <td>${esc(c.telefon)||"–"}<small>${esc(c.email)}</small></td>
+        <td>${esc(c.tipus)}<small>${c.potencia ? esc(c.potencia)+" kW" : ""}</small></td>
+        <td>${eur(c.import)}${c.import ? `<small>Cobrat ${eur(cobrat(c))}<br>Pendent ${eur(Math.max(c.import - cobrat(c), 0))}</small>` : ""}</td>
+        <td><select data-s="${c.id}" style="border-color:${ESTATS[c.estat]};color:${ESTATS[c.estat]}">${Object.keys(ESTATS).map(e => `<option ${e===c.estat?"selected":""}>${e}</option>`).join("")}</select></td>
+        <td class="${c.seguiment && c.seguiment < avui && !["Pagat","Descartat"].includes(c.estat) ? "late":""}">${c.seguiment ? new Date(c.seguiment).toLocaleDateString("ca-ES") : "–"}</td>
+        <td class="act"><button data-e="${c.id}">Edita</button> <button class="d" data-x="${c.id}">Elimina</button></td>
+      </tr>${c.notes ? `<tr><td colspan="7" style="padding-top:0;color:var(--mute);font-size:13px">${esc(c.notes)}</td></tr>` : ""}`).join("")}
+    </table>` : `<div class="empty">${clients.length ? "Cap client coincideix amb el filtre." : "Encara no hi ha clients. Afegeix el primer amb el botó «Afegeix client»."}</div>`}</div>
+    <p style="color:var(--mute);font-size:13px">${llista.length} clients · Import total: ${eur(total)} · Cobrat: ${eur(cobTotal)} · Pendent de cobrar: ${eur(Math.max(total - cobTotal, 0))}</p>
+  </main>`;
+  document.querySelectorAll("[data-f]").forEach(b => b.onclick = () => { filtre = b.dataset.f; pinta(); });
+  document.querySelectorAll("[data-s]").forEach(s => s.onchange = () => desa({id: isNaN(s.dataset.s) ? s.dataset.s : Number(s.dataset.s), estat: s.value}));
+  document.querySelectorAll("[data-e]").forEach(b => b.onclick = () => obre(clients.find(c => String(c.id) === b.dataset.e)));
+  document.querySelectorAll("[data-x]").forEach(b => b.onclick = () => esborra(isNaN(b.dataset.x) ? b.dataset.x : Number(b.dataset.x)));
+  $("nou").onclick = () => obre(null);
+  $("q").oninput = e => { cerca = e.target.value; const p = e.target.selectionStart; pinta(); $("q").focus(); $("q").setSelectionRange(p,p); };
+  if ($("out")) $("out").onclick = () => sb.auth.signOut();
+}
+
+function obre(c){
+  editId = c ? c.id : null;
+  $("dt").textContent = c ? "Edita el client" : "Nou client";
+  CAMPS.forEach(k => $(k).value = c ? (c[k] ?? "") : (k === "estat" ? "Nou contacte" : k === "tipus" ? "Habitatge" : ""));
+  pags = c && c.pagaments ? JSON.parse(JSON.stringify(c.pagaments)) : [];
+  pintaPags();
+  $("dlg").showModal();
+}
+$("cancel").onclick = () => $("dlg").close();
+$("frm").onsubmit = () => {
+  const c = {};
+  CAMPS.forEach(k => { const v = $(k).value.trim(); c[k] = ["potencia","import"].includes(k) ? (v === "" ? null : Number(v)) : (k === "seguiment" && !v ? null : v); });
+  c.pagaments = pags.filter(p => p.import !== "" && p.import != null);
+  if (editId) c.id = editId;
+  desa(c);
+};
+
+function pantallaLogin(){
+  $("app").innerHTML = `<form id="login"><div class="logo" style="margin-bottom:16px"><span class="sun"></span>Arpam Solar</div>
+    <input id="le" name="email" type="email" placeholder="Correu electrònic" autocomplete="username" required>
+    <input id="lp" name="password" type="password" placeholder="Contrasenya" autocomplete="current-password" required>
+    <button class="p" id="lb" type="submit" style="width:100%">Entra</button><p id="lm" class="late"></p></form>`;
+  $("login").onsubmit = async ev => {
+    ev.preventDefault();
+    const {error} = await sb.auth.signInWithPassword({email:$("le").value.trim(), password:$("lp").value});
+    if (error) $("lm").textContent = "No s'ha pogut entrar: " + error.message;
+  };
+}
+
+if (demo) carrega();
+else {
+  sb.auth.getSession().then(({data, error}) => {
+    if (error) throw error;
+    data.session ? carrega() : pantallaLogin();
+  });
+  sb.auth.onAuthStateChange((ev) => { if (ev === "SIGNED_IN") carrega(); if (ev === "SIGNED_OUT") pantallaLogin(); });
+}
+</script>
+</body>
+</html>
