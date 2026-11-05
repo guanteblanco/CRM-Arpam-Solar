@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arpam Solar · Clients</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#eef2f4;--panel:#fff;--ink:#14232b;--mute:#5d6f78;--line:#d9e1e5;--brand:#0f4c5c;--sun:#f5b301;--danger:#b42318}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1a20;--panel:#15262e;--ink:#e8eff2;--mute:#8fa4ae;--line:#26404b;--brand:#5fb3c7;--danger:#f97066}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 Figtree,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;margin-right:auto}
+.logo img{height:26px;width:auto;display:block}
+#login .logo img{height:32px}
+@media (prefers-color-scheme:dark){.logo img{filter:invert(1)}}
+main{max-width:1150px;margin:0 auto;padding:20px}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+button{cursor:pointer;border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:8px}
+button.p{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+@media (prefers-color-scheme:dark){button.p{color:#0e1a20}}
+button.d{color:var(--danger)}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.chip{border-radius:20px;padding:5px 12px;font-size:13px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip b{margin-left:4px;opacity:.7}
+.bar{display:flex;gap:10px;margin-bottom:14px}
+.wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:820px}
+th{text-align:left;font-size:13px;color:var(--mute);font-weight:500;padding:10px 14px;border-bottom:1px solid var(--line)}
+td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border:0}
+td small{display:block;color:var(--mute)}
+td select{width:auto;font-weight:600;border-radius:20px;padding:4px 8px}
+.late{color:var(--danger);font-weight:600}
+.empty{padding:40px;text-align:center;color:var(--mute)}
+.cd{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:20px;font-size:12px;font-weight:700;vertical-align:middle}
+.cd.g{background:#16a34a;color:#fff}.cd.y{background:#facc15;color:#422006}.cd.r{background:#dc2626;color:#fff}.cd.k{background:#000;color:#fff;border:1px solid var(--mute)}
+.hd{cursor:grab;color:var(--mute);width:22px;padding-right:0;user-select:none}
+tr.dragging{opacity:.35}tr.over td{box-shadow:inset 0 2px 0 var(--brand)}
+.act{white-space:nowrap;text-align:right}
+.act button{padding:5px 10px;font-size:13px}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);width:min(700px,94vw);padding:22px;max-height:92vh}
+dialog::backdrop{background:#0008}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g label{font-size:13px;color:var(--mute)}
+.g .f{grid-column:1/-1}
+.pr{display:grid;grid-template-columns:130px 1fr 110px auto auto;gap:8px;align-items:center;margin-bottom:8px}
+.pr input[type=checkbox]{width:auto}
+.pr .ck{display:flex;gap:5px;align-items:center;color:var(--ink);font-size:14px}
+#resum{margin:10px 0 0;font-size:14px;color:var(--ink)}
+@media(max-width:600px){.pr{grid-template-columns:1fr 1fr}}
+.ft{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+#login{max-width:340px;margin:12vh auto;padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+#login input{margin-bottom:10px}
+.demo{background:var(--sun);color:#14232b;padding:6px 20px;font-size:13px;text-align:center}
+@media(max-width:600px){.g{grid-template-columns:1fr}.bar{flex-direction:column}}
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<script src="config.js"></script>
+<script>
+window.addEventListener("error", e => {
+  const a = document.getElementById("app");
+  if (a && !a.innerHTML.trim()) a.innerHTML = '<div style="max-width:480px;margin:10vh auto;padding:20px;font-family:sans-serif"><b>No s\'ha pogut iniciar l\'app</b><p style="color:#b42318">' + String(e.message).replace(/</g,"&lt;") + '</p><p>Revisa SUPABASE_URL i SUPABASE_KEY a config.js, i que tinguis connexió a Internet.</p></div>';
+});
+</script>
+
+<div id="app"></div>
+
+<dialog id="dlg">
+  <form id="frm" method="dialog">
+    <h2 id="dt" style="margin:0 0 14px">Nou client</h2>
+    <div class="g">
+      <div class="f"><label>Nom o empresa *<input id="nom" required></label></div>
+      <div><label>Telèfon<input id="telefon" type="tel"></label></div>
+      <div><label>Correu electrònic<input id="email" type="email"></label></div>
+      <div><label>Població<input id="poblacio"></label></div>
+      <div><label>Tipus d'instal·lació<select id="tipus"><option>Habitatge</option><option>Empresa / nau</option><option>Agrícola</option><option>Altres</option></select></label></div>
+      <div class="f" style="border-top:1px solid var(--line);padding-top:12px"><b style="font-size:15px">Instal·lació</b></div>
+      <div><label>Nombre de plaques<input id="num_plaques" type="number" min="0" step="1"></label></div>
+      <div><label>Potència per placa (W)<input id="potencia_placa" type="number" min="0" step="1"></label></div>
+      <div><label>Inversor (kW)<input id="inversor_kw" type="number" min="0" step="0.1"></label></div>
+      <div><label>Fase<select id="fase"><option value="">—</option><option>Monofàsic</option><option>Trifàsic</option></select></label></div>
+      <div><label>Tipus de sistema<select id="sistema"><option value="">—</option><option>Aïllat</option><option>Combinat amb xarxa</option></select></label></div>
+      <div><label>Va a teulat?<select id="teulat"><option value="">—</option><option>Sí</option><option>No</option></select></label></div>
+      <div id="ubiw" style="display:none" class="f"><label>On van els panells?<input id="ubicacio" placeholder="Terra, pèrgola, coberta…"></label></div>
+      <div><label>Bateria<select id="te_bateria"><option>No</option><option>Sí</option></select></label></div>
+      <div id="w_bat" style="display:none"><label>Capacitat bateria (kWh)<input id="bateria_kwh" type="number" min="0" step="0.1"></label></div>
+      <div><label>Generador<select id="te_generador"><option>No</option><option>Sí</option></select></label></div>
+      <div id="w_gen" style="display:none"><label>Capacitat generador (kW)<input id="generador_kw" type="number" min="0" step="0.1"></label></div>
+      <div><label>Import (€)<input id="import" type="number" step="0.01" min="0"></label></div>
+      <div><label>Estat<select id="estat"></select></label></div>
+      <div><label>Proper seguiment<input id="seguiment" type="date"></label></div>
+      <div class="f"><label>Notes<textarea id="notes" rows="3"></textarea></label></div>
+      <div class="f" style="border-top:1px solid var(--line);padding-top:12px">
+        <b style="font-size:15px">Pagaments</b>
+        <div id="pags" style="margin:10px 0"></div>
+        <button type="button" id="addp">Afegeix pagament</button>
+        <p id="resum"></p>
+      </div>
+      <div class="f" style="border-top:1px solid var(--line);padding-top:12px">
+        <label>Recordatori al client: com està el pressupost?<select id="rec_estat"><option value="">—</option><option value="pendent">Encara no està preparat</option><option value="enviat">Ja l'hem enviat</option></select></label>
+        <div id="rec_w" style="display:none;gap:10px;margin-top:8px;align-items:center"><select id="rec_idioma" style="width:auto"><option value="ca">Català</option><option value="es">Castellà</option></select><button type="button" id="genrec">Generar recordatori</button></div>
+      </div>
+      <div class="f" id="mailbox" style="display:none;border-top:1px solid var(--line);padding-top:12px">
+        <label><span id="mailtit">Correu</span><textarea id="mailtxt" rows="14"></textarea></label>
+        <div class="ft" style="margin-top:8px"><button type="button" id="copia">Copia</button><button type="button" id="gdraft" style="display:none">Crea esborrany a Gmail</button><button type="button" class="p" id="mailto">Obre a Gmail</button></div>
+      </div>
+    </div>
+    <div class="ft"><button type="button" id="gen" style="margin-right:auto">Generar correu</button><button type="button" id="cancel">Cancel·la</button><button class="p">Desa</button></div>
+  </form>
+</dialog>
+
+<script>
+const ESTATS = {
+  "Nou contacte":"#3b82f6","Pendent de pressupost":"#f59e0b","Pressupost enviat":"#8b5cf6",
+  "Per facturar":"#ea580c","Pendent de pagament":"#dc2626","Pagat":"#16a34a","Descartat":"#6b7280"
+};
+const demo = !SUPABASE_URL;
+const sb = demo ? null : supabase.createClient(SUPABASE_URL.trim().replace(/\/+$/,"").replace(/\/rest\/v1$/,""), SUPABASE_KEY.trim());
+let clients = [], filtre = "Tots", cerca = "", editId = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const eur = n => n || n === 0 ? Number(n).toLocaleString("ca-ES",{style:"currency",currency:"EUR"}) : "–";
+const CAMPS = ["nom","telefon","email","poblacio","tipus","num_plaques","potencia_placa","inversor_kw","fase","sistema","teulat","ubicacio","te_bateria","bateria_kwh","te_generador","generador_kw","import","estat","seguiment","notes"];
+$("estat").innerHTML = Object.keys(ESTATS).map(e => `<option>${e}</option>`).join("");
+
+const NUM = ["num_plaques","potencia_placa","inversor_kw","bateria_kwh","generador_kw","import"];
+const DEF = {estat:"Nou contacte", tipus:"Habitatge", te_bateria:"No", te_generador:"No"};
+const detall = c => [c.num_plaques ? `${c.num_plaques} plaques${c.potencia_placa ? " de " + c.potencia_placa + " W" : ""}` : "", c.inversor_kw ? `Inversor ${c.inversor_kw} kW` : "", c.te_bateria === "Sí" ? `Bateria${c.bateria_kwh ? " " + c.bateria_kwh + " kWh" : ""}` : "", c.fase, c.sistema].filter(Boolean).join(" · ");
+let pags = [];
+const cobrat = c => (c.pagaments || []).reduce((s,p) => s + (p.cobrat ? Number(p.import) || 0 : 0), 0);
+function resum(){
+  const imp = Number($("import").value) || 0;
+  const cob = pags.reduce((s,p) => s + (p.cobrat ? Number(p.import) || 0 : 0), 0);
+  const prev = pags.reduce((s,p) => s + (Number(p.import) || 0), 0);
+  $("resum").innerHTML = `Cobrat: <b>${eur(cob)}</b> · Pendent de cobrar: <b>${eur(Math.max(imp - cob, 0))}</b>` +
+    (imp && prev !== imp ? ` · <span class="late">Els pagaments sumen ${eur(prev)} i l'import és ${eur(imp)}</span>` : "");
+}
+function pintaPags(){
+  $("pags").innerHTML = pags.length ? pags.map((p,i) => `<div class="pr">
+    <input type="date" data-p="${i}" data-k="data" value="${esc(p.data)}" aria-label="Data">
+    <input data-p="${i}" data-k="concepte" placeholder="Concepte (ex: entrada 30%)" value="${esc(p.concepte)}">
+    <input type="number" step="0.01" min="0" data-p="${i}" data-k="import" placeholder="Import €" value="${esc(p.import)}">
+    <label class="ck"><input type="checkbox" data-p="${i}" data-k="cobrat" ${p.cobrat ? "checked" : ""}>Cobrat</label>
+    <button type="button" class="d" data-dp="${i}" aria-label="Elimina el pagament">✕</button></div>`).join("")
+    : '<small style="color:var(--mute)">Encara no hi ha pagaments. Afegeix-hi l\'entrada i els pagaments previstos.</small>';
+  $("pags").querySelectorAll("[data-p]").forEach(el => el.oninput = el.onchange = () => {
+    pags[el.dataset.p][el.dataset.k] = el.type === "checkbox" ? el.checked : el.dataset.k === "import" ? (el.value === "" ? "" : Number(el.value)) : el.value;
+    resum();
+  });
+  $("pags").querySelectorAll("[data-dp]").forEach(b => b.onclick = () => { pags.splice(b.dataset.dp, 1); pintaPags(); });
+  resum();
+}
+function mostra(){
+  $("ubiw").style.display = $("teulat").value === "No" ? "" : "none";
+  $("w_bat").style.display = $("te_bateria").value === "Sí" ? "" : "none";
+  $("w_gen").style.display = $("te_generador").value === "Sí" ? "" : "none";
+}
+["teulat","te_bateria","te_generador"].forEach(k => $(k).onchange = mostra);
+
+let assumpte = "", mailTo = "";
+const gOn = () => typeof GOOGLE_CLIENT_ID !== "undefined" && GOOGLE_CLIENT_ID;
+function panel(tit, to, subj, text){
+  assumpte = subj; mailTo = to;
+  $("mailtit").textContent = tit; $("mailtxt").value = text;
+  $("mailbox").style.display = ""; $("gdraft").style.display = gOn() ? "" : "none";
+  $("mailtxt").scrollIntoView({behavior:"smooth", block:"center"});
+}
+function genera(){
+  const v = k => $(k).value.trim();
+  const np = v("num_plaques"), bat = v("te_bateria") === "Sí", gen = v("te_generador") === "Sí", comb = v("sistema") === "Combinat amb xarxa";
+  const fase = {"Monofàsic":"monofásico","Trifàsic":"trifásico"}[v("fase")];
+  const sis = {"Aïllat":"aislado","Combinat amb xarxa":"combinado con red"}[v("sistema")] || "(pendiente de definir)";
+  const L = ["Hola Ruben,", "", "Necesitamos material para una instalación fotovoltaica. Estos son los datos:", "",
+    "• Placas: " + (np || "(pendiente de definir)") + " unidades de " + (v("potencia_placa") ? v("potencia_placa") + " W" : "(potencia pendiente de definir)"),
+    "• Inversor: " + (v("inversor_kw") ? v("inversor_kw") + " kW" : "(pendiente de definir)") + (fase ? ", " + fase : ""),
+    "• Sistema: " + sis,
+    "• Batería: " + (bat ? "sí" + (v("bateria_kwh") ? ", " + v("bateria_kwh") + " kWh" : "") + ". Las baterías las ponemos nosotros, pero te lo indico porque afecta al tipo de inversor." : "no"),
+    "• Generador: " + (gen ? "sí" + (v("generador_kw") ? ", " + v("generador_kw") + " kW" : "") : "no"), ""];
+  if (v("teulat") === "Sí") L.push("La instalación va en tejado, por lo que necesitamos taco químico, varillas y anclajes con estructura de aluminio para " + (np ? np + " placas" : "las placas indicadas") + ".");
+  else if (v("teulat") === "No") L.push("Los paneles no van en tejado" + (v("ubicacio") ? " (" + v("ubicacio") + ")" : "") + ", así que la estructura ya la miramos directamente con Solarbloc.");
+  else L.push("Todavía está pendiente de confirmar si va en tejado.");
+  if (comb) L.push("", "Al ser sistema combinado con red necesitaríamos hacerlo con backup.");
+  L.push("", "¿Me puedes decir disponibilidad y precio cuando puedas?", "", "Gracias y un saludo,", "Arpam Solar");
+  panel("Correu per al Ruben (en castellà; el pots editar abans d'enviar-lo)", typeof PROVEIDOR_EMAIL !== "undefined" ? PROVEIDOR_EMAIL : "", "Solicitud de material – instalación fotovoltaica", L.join("\n"));
+}
+function genRec(){
+  const nom = $("nom").value.trim() || "client", ca = $("rec_idioma").value === "ca", pend = $("rec_estat").value === "pendent";
+  const T = {
+    ca: {
+      pendent: "Et escrivim d'Arpam Solar per recordar-te que estem pendents de preparar el teu pressupost. Si vols, podem passar a fer una visita quan et vagi bé, o parlar-ne per telèfon per poder procedir amb el pressupost.",
+      enviat: "Et escrivim d'Arpam Solar per saber si has pogut mirar-te i valorar el pressupost que et vam enviar. Si tens qualsevol dubte o vols que en parlem, ens ho pots dir sense cap compromís."
+    },
+    es: {
+      pendent: "Te escribimos desde Arpam Solar para recordarte que estamos pendientes de preparar tu presupuesto. Si quieres, podemos pasar a hacer una visita cuando te venga bien, o hablarlo por teléfono para poder proceder con el presupuesto.",
+      enviat: "Te escribimos desde Arpam Solar para saber si has podido mirar y valorar el presupuesto que te enviamos. Si tienes cualquier duda o quieres que lo hablemos, dínoslo sin ningún compromiso."
+    }
+  };
+  const cos = ca ? ["Hola " + nom + ",", "", T.ca[pend ? "pendent" : "enviat"], "", "Quedem a la teva disposició.", "", "Salutacions,", "Arpam Solar"]
+                 : ["Hola " + nom + ",", "", T.es[pend ? "pendent" : "enviat"], "", "Quedamos a tu disposición.", "", "Un saludo,", "Arpam Solar"];
+  panel("Recordatori per al client (" + (ca ? "català" : "castellà") + "; el pots editar abans d'enviar-lo)", $("email").value.trim(),
+        ca ? "Pressupost instal·lació fotovoltaica – Arpam Solar" : "Presupuesto instalación fotovoltaica – Arpam Solar", cos.join("\n"));
+}
+$("rec_estat").onchange = () => { $("rec_w").style.display = $("rec_estat").value ? "flex" : "none"; };
+$("genrec").onclick = genRec;
+$("gen").onclick = genera;
+$("copia").onclick = async () => { try { await navigator.clipboard.writeText("Assumpte: " + assumpte + "\n\n" + $("mailtxt").value); $("copia").textContent = "Copiat ✓"; setTimeout(() => $("copia").textContent = "Copia", 2000); } catch { $("mailtxt").select(); } };
+$("mailto").onclick = () => window.open("https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(mailTo) + "&su=" + encodeURIComponent(assumpte) + "&body=" + encodeURIComponent($("mailtxt").value), "_blank");
+$("gdraft").onclick = () => {
+  if (typeof google === "undefined") return alert("No s'ha pogut carregar Google. Revisa la connexió o desactiva el bloquejador de continguts.");
+  const b64 = t => btoa(unescape(encodeURIComponent(t)));
+  const crea = async tok => {
+    const mime = ["To: " + mailTo, "Subject: =?UTF-8?B?" + b64(assumpte) + "?=", "MIME-Version: 1.0", "Content-Type: text/plain; charset=UTF-8", "Content-Transfer-Encoding: base64", "", b64($("mailtxt").value).replace(/.{76}/g, "$&\r\n")].join("\r\n");
+    const raw = btoa(mime).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    const r = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/drafts", {method:"POST", headers:{Authorization:"Bearer " + tok, "Content-Type":"application/json"}, body: JSON.stringify({message:{raw}})});
+    alert(r.ok ? "Esborrany creat a Gmail ✓" : "No s'ha pogut crear l'esborrany: " + await r.text());
+  };
+  google.accounts.oauth2.initTokenClient({client_id: GOOGLE_CLIENT_ID, scope: "https://www.googleapis.com/auth/gmail.compose",
+    callback: r => r.access_token ? crea(r.access_token) : alert("No s'ha pogut connectar amb Google.")}).requestAccessToken();
+};
+$("addp").onclick = () => { pags.push({data:new Date().toISOString().slice(0,10), concepte:"", import:"", cobrat:false}); pintaPags(); };
+$("import").oninput = resum;
+
+async function carrega(){
+  if (demo) clients = JSON.parse(localStorage.getItem("arpam_clients") || "[]");
+  else {
+    const {data,error} = await sb.from("clients").select("*").order("ordre",{ascending:true,nullsFirst:false}).order("created_at",{ascending:false});
+    if (error) return alert("Error en carregar: " + error.message);
+    clients = data;
+  }
+  pinta();
+}
+async function desa(c){
+  if (!c.id) c.ordre = Math.min(0, ...clients.map(x => x.ordre ?? 0)) - 1;
+  if (demo) {
+    if (c.id) clients = clients.map(x => x.id === c.id ? {...x,...c} : x);
+    else clients.unshift({...c, id: Date.now()});
+    localStorage.setItem("arpam_clients", JSON.stringify(clients));
+  } else {
+    const r = c.id ? await sb.from("clients").update(c).eq("id", c.id) : await sb.from("clients").insert(c);
+    if (r.error) return alert("Error en desar: " + r.error.message);
+  }
+  carrega();
+}
+async function esborra(id){
+  if (!confirm("Segur que vols eliminar aquest client? No es pot desfer.")) return;
+  if (demo) { clients = clients.filter(x => x.id !== id); localStorage.setItem("arpam_clients", JSON.stringify(clients)); }
+  else { const {error} = await sb.from("clients").delete().eq("id", id); if (error) return alert(error.message); }
+  carrega();
+}
+
+const dies = d => { if (!d) return null; const [y,m,dd] = d.split("-").map(Number), t = new Date(); return Math.round((new Date(y, m-1, dd) - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 864e5); };
+const compte = c => {
+  const n = dies(c.seguiment);
+  if (n === null || ["Pagat","Descartat"].includes(c.estat)) return "";
+  const cls = n <= 0 ? "k" : n <= 2 ? "r" : n < 7 ? "y" : "g";
+  const txt = n === 0 ? "Avui" : n < 0 ? "Fa " + (-n) + (n === -1 ? " dia" : " dies") : n + (n === 1 ? " dia" : " dies");
+  return `<span class="cd ${cls}" title="Seguiment: ${new Date(c.seguiment).toLocaleDateString("ca-ES")}">${txt}</span>`;
+};
+let dragId = null;
+async function mou(from, to){
+  if (!from || from === to) return;
+  const a = clients.findIndex(c => String(c.id) === from), b = clients.findIndex(c => String(c.id) === to);
+  if (a < 0 || b < 0) return;
+  clients.splice(b, 0, clients.splice(a, 1)[0]);
+  const canvis = clients.filter((c, i) => c.ordre !== i && (c.ordre = i, true));
+  pinta();
+  if (demo) localStorage.setItem("arpam_clients", JSON.stringify(clients));
+  else { const rs = await Promise.all(canvis.map(c => sb.from("clients").update({ordre: c.ordre}).eq("id", c.id))); const e = rs.find(r => r.error); if (e) alert("Error en desar l'ordre: " + e.error.message); }
+}
+function pinta(){
+  const avui = new Date().toISOString().slice(0,10);
+  const cnt = e => clients.filter(c => c.estat === e).length;
+  const llista = clients.filter(c =>
+    (filtre === "Tots" || c.estat === filtre) &&
+    (!cerca || [c.nom,c.telefon,c.email,c.poblacio,c.notes].join(" ").toLowerCase().includes(cerca.toLowerCase())));
+  const total = llista.reduce((s,c) => s + (Number(c.import) || 0), 0);
+  const cobTotal = llista.reduce((s,c) => s + cobrat(c), 0);
+  $("app").innerHTML = `
+  ${demo ? '<div class="demo">Mode prova: les dades només es guarden en aquest navegador. Configura Supabase per compartir-les amb els socis.</div>' : ''}
+  <header><div class="logo"><img src="logo.png" alt="Arpam Solar"></div>
+    ${demo ? '' : '<button id="out">Tanca la sessió</button>'}</header>
+  <main>
+    <div class="chips">
+      <button class="chip ${filtre==="Tots"?"on":""}" data-f="Tots">Tots<b>${clients.length}</b></button>
+      ${Object.keys(ESTATS).map(e => `<button class="chip ${filtre===e?"on":""}" data-f="${e}">${e}<b>${cnt(e)}</b></button>`).join("")}
+    </div>
+    <div class="bar"><input id="q" placeholder="Cerca per nom, telèfon, població…" value="${esc(cerca)}"><button class="p" id="nou">Afegeix client</button></div>
+    <div class="wrap">${llista.length ? `<table>
+      <tr><th></th><th>Client</th><th>Contacte</th><th>Instal·lació</th><th>Import</th><th>Estat</th><th>Seguiment</th><th></th></tr>
+      ${llista.map(c => `<tr data-id="${c.id}" draggable="true">
+        <td class="hd" title="Arrossega per canviar l'ordre">⠿</td>
+        <td><b>${esc(c.nom)}</b>${compte(c)}<small>${esc(c.poblacio)}</small></td>
+        <td>${esc(c.telefon)||"–"}<small>${esc(c.email)}</small></td>
+        <td>${esc(c.tipus)}<small>${esc(detall(c))}</small></td>
+        <td>${eur(c.import)}${c.import ? `<small>Cobrat ${eur(cobrat(c))}<br>Pendent ${eur(Math.max(c.import - cobrat(c), 0))}</small>` : ""}</td>
+        <td><select data-s="${c.id}" style="border-color:${ESTATS[c.estat]};color:${ESTATS[c.estat]}">${Object.keys(ESTATS).map(e => `<option ${e===c.estat?"selected":""}>${e}</option>`).join("")}</select></td>
+        <td>${c.seguiment ? new Date(c.seguiment).toLocaleDateString("ca-ES") : "–"}</td>
+        <td class="act"><button data-e="${c.id}">Edita</button> <button class="d" data-x="${c.id}">Elimina</button></td>
+      </tr>${c.notes ? `<tr><td colspan="8" style="padding-top:0;color:var(--mute);font-size:13px">${esc(c.notes)}</td></tr>` : ""}`).join("")}
+    </table>` : `<div class="empty">${clients.length ? "Cap client coincideix amb el filtre." : "Encara no hi ha clients. Afegeix el primer amb el botó «Afegeix client»."}</div>`}</div>
+    <p style="color:var(--mute);font-size:13px">${llista.length} clients · Import total: ${eur(total)} · Cobrat: ${eur(cobTotal)} · Pendent de cobrar: ${eur(Math.max(total - cobTotal, 0))}</p>
+  </main>`;
+  document.querySelectorAll("[data-f]").forEach(b => b.onclick = () => { filtre = b.dataset.f; pinta(); });
+  document.querySelectorAll("[data-s]").forEach(s => s.onchange = () => desa({id: isNaN(s.dataset.s) ? s.dataset.s : Number(s.dataset.s), estat: s.value}));
+  document.querySelectorAll("[data-e]").forEach(b => b.onclick = () => obre(clients.find(c => String(c.id) === b.dataset.e)));
+  document.querySelectorAll("[data-x]").forEach(b => b.onclick = () => esborra(isNaN(b.dataset.x) ? b.dataset.x : Number(b.dataset.x)));
+  $("nou").onclick = () => obre(null);
+  document.querySelectorAll("tr[data-id]").forEach(tr => {
+    tr.ondragstart = e => { dragId = tr.dataset.id; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", dragId); tr.classList.add("dragging"); };
+    tr.ondragend = () => { tr.classList.remove("dragging"); document.querySelectorAll("tr.over").forEach(x => x.classList.remove("over")); };
+    tr.ondragover = e => { e.preventDefault(); tr.classList.add("over"); };
+    tr.ondragleave = () => tr.classList.remove("over");
+    tr.ondrop = e => { e.preventDefault(); mou(dragId, tr.dataset.id); };
+  });
+  $("q").oninput = e => { cerca = e.target.value; const p = e.target.selectionStart; pinta(); $("q").focus(); $("q").setSelectionRange(p,p); };
+  if ($("out")) $("out").onclick = () => sb.auth.signOut();
+}
+
+function obre(c){
+  editId = c ? c.id : null;
+  $("dt").textContent = c ? "Edita el client" : "Nou client";
+  CAMPS.forEach(k => $(k).value = (c && c[k] != null) ? c[k] : (DEF[k] ?? ""));
+  $("mailbox").style.display = "none"; mostra(); $("rec_estat").value = ""; $("rec_w").style.display = "none";
+  pags = c && c.pagaments ? JSON.parse(JSON.stringify(c.pagaments)) : [];
+  pintaPags();
+  $("dlg").showModal();
+}
+$("cancel").onclick = () => $("dlg").close();
+$("frm").onsubmit = () => {
+  const c = {};
+  CAMPS.forEach(k => { const v = $(k).value.trim(); c[k] = NUM.includes(k) ? (v === "" ? null : Number(v)) : (k === "seguiment" && !v ? null : v); });
+  if (c.teulat !== "No") c.ubicacio = "";
+  if (c.te_bateria !== "Sí") c.bateria_kwh = null;
+  if (c.te_generador !== "Sí") c.generador_kw = null;
+  c.pagaments = pags.filter(p => p.import !== "" && p.import != null);
+  if (editId) c.id = editId;
+  desa(c);
+};
+
+function pantallaLogin(){
+  $("app").innerHTML = `<form id="login"><div class="logo" style="margin-bottom:16px"><img src="logo.png" alt="Arpam Solar"></div>
+    <input id="le" name="email" type="email" placeholder="Correu electrònic" autocomplete="username" required>
+    <input id="lp" name="password" type="password" placeholder="Contrasenya" autocomplete="current-password" required>
+    <button class="p" id="lb" type="submit" style="width:100%">Entra</button><p id="lm" class="late"></p></form>`;
+  $("login").onsubmit = async ev => {
+    ev.preventDefault();
+    const {error} = await sb.auth.signInWithPassword({email:$("le").value.trim(), password:$("lp").value});
+    if (error) $("lm").textContent = "No s'ha pogut entrar: " + error.message;
+  };
+}
+
+if (demo) carrega();
+else {
+  sb.auth.getSession().then(({data, error}) => {
+    if (error) throw error;
+    data.session ? carrega() : pantallaLogin();
+  });
+  sb.auth.onAuthStateChange((ev) => { if (ev === "SIGNED_IN") carrega(); if (ev === "SIGNED_OUT") pantallaLogin(); });
+}
+</script>
+</body>
+</html>
